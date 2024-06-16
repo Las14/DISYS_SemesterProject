@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 public class MessageSender {
-    private final static String QUEUE_NAME = "generate_invoice";
+    private final static String QUEUE_NAME = "customer_id";
 
     public void generateInvoice(String customerId) {
         ConnectionFactory factory = new ConnectionFactory();

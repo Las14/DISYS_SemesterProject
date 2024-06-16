@@ -1,9 +1,7 @@
 package com.example.datacollectiondispatcher;
 
 import com.example.datacollectiondispatcher.entity.StationEntity;
-import com.example.datacollectiondispatcher.repository.StationRepository;
 import com.rabbitmq.client.DeliverCallback;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,29 +12,32 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootApplication
 public class DataCollectionDispatcherApplication {
 
-    private final static String QUEUE_NAME = "generate_invoice";
+    private final static String QUEUE_CUSTOMER_ID = "customer_id"; //red message
+    private final static String QUEUE_CUSTOMER_STATIONS_DATA = "customer_stations_data"; //green
+    private final static String QUEUE_INVOICE_GENERATION_STARTED = "invoice_generation_started"; //purple
+
+    private static DispatcherService dispatcherService;
 
     public static void main(String[] args) {
         SpringApplication.run(DataCollectionDispatcherApplication.class, args);
     }
 
+    //Run this code when application has started
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
 
             try {
-                receiveCustomerNumber();
-
-                DispatcherService dispatcherService = ctx.getBean(DispatcherService.class);
-                List<StationEntity> stations = dispatcherService.fetchStations();
-                stations.forEach(station -> System.out.println(station.getDbUrl()));
+                // Inject to use the DispatcherService
+                dispatcherService = ctx.getBean(DispatcherService.class);
+                receiveCustomerNumber(); //receive red message
             }
             catch(Exception e) {
                 System.out.println(" [*] An exception occurred...");
@@ -50,13 +51,57 @@ public class DataCollectionDispatcherApplication {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        channel.queueDeclare(QUEUE_CUSTOMER_ID, false, false, false, null);
         System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            String message = new String(delivery.getBody(), "UTF-8");
-            System.out.println(" [x] Received customer Id '" + message + "'");
+            String customerId = new String(delivery.getBody(), "UTF-8");
+            System.out.println(" [x] Received customer Id '" + customerId + "'");
+            List<StationEntity> stations = dispatcherService.fetchStations();
+            CustomerStationData data = new CustomerStationData(customerId, stations);
+
+            sendStationData(data); //send green message
+            sendInvoiceGenerationInfos(data); //send purple message
         };
-        channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> { });
+          channel.basicConsume(QUEUE_CUSTOMER_ID, true, deliverCallback, consumerTag -> { });
+    }
+
+    public static void sendStationData(CustomerStationData data) {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+
+        try (Connection connection = factory.newConnection();
+             Channel channel = connection.createChannel()) {
+            channel.queueDeclare(QUEUE_CUSTOMER_STATIONS_DATA, false, false, false, null);
+
+            // convert stationData to JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            String message = objectMapper.writeValueAsString(data);
+
+            channel.basicPublish("", QUEUE_CUSTOMER_STATIONS_DATA, null, message.getBytes());
+            System.out.println(" [x] Sent stations data to stat invoice request for customer '" + data.getCustomerId() + "'");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void sendInvoiceGenerationInfos(CustomerStationData data) {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+
+        try (Connection connection = factory.newConnection();
+             Channel channel = connection.createChannel()) {
+            channel.queueDeclare(QUEUE_INVOICE_GENERATION_STARTED, false, false, false, null);
+
+            String message = data.getCustomerId() + ";" + data.getStations().size();
+            channel.basicPublish("", QUEUE_INVOICE_GENERATION_STARTED, null, message.getBytes());
+            System.out.println(" [x] Sent invoice generation started data  '" + message + "'");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

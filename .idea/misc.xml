@@ -5,6 +5,9 @@
       <list>
         <option value="$PROJECT_DIR$/StationsApi/pom.xml" />
         <option value="$PROJECT_DIR$/DataCollectionDispatcher/pom.xml" />
+        <option value="$PROJECT_DIR$/StationDataCollector/pom.xml" />
+        <option value="$PROJECT_DIR$/DataCollectionReceiver/pom.xml" />
+        <option value="$PROJECT_DIR$/PdfGenerator/pom.xml" />
       </list>
     </option>
   </component>
