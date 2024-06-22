@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/StationDataCollector/pom.xml" />
         <option value="$PROJECT_DIR$/DataCollectionReceiver/pom.xml" />
         <option value="$PROJECT_DIR$/PdfGenerator/pom.xml" />
+        <option value="$PROJECT_DIR$/Client/pom.xml" />
       </list>
     </option>
   </component>

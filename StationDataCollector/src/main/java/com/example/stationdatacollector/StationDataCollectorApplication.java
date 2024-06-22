@@ -24,8 +24,8 @@ import java.util.concurrent.TimeoutException;
 @SpringBootApplication
 public class StationDataCollectorApplication {
 
-    private final static String QUEUE_CUSTOMER_STATIONS_DATA = "customer_stations_data"; //green
-    private final static String QUEUE_CUSTOMER_CHARGE_DATA = "customer_charge_data"; //blue
+    public final static String QUEUE_CUSTOMER_STATIONS_DATA = "customer_stations_data"; //green
+    public final static String QUEUE_CUSTOMER_CHARGE_DATA = "customer_charge_data"; //blue
 
     public static void main(String[] args) {
         SpringApplication.run(StationDataCollectorApplication.class, args);
@@ -37,7 +37,8 @@ public class StationDataCollectorApplication {
         return args -> {
 
             try {
-                receiveInvoiceData(); //receive green message
+                ConnectionFactory factory = new ConnectionFactory(); //create factory here to be able to test it
+                receiveInvoiceData(factory); //receive green message
             }
             catch(Exception e) {
                 System.out.println(" [*] An exception occurred...");
@@ -45,8 +46,7 @@ public class StationDataCollectorApplication {
         };
     }
 
-    private static void receiveInvoiceData() throws IOException, TimeoutException {
-        ConnectionFactory factory = new ConnectionFactory();
+    public static void receiveInvoiceData(ConnectionFactory factory) throws IOException, TimeoutException {
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
@@ -68,7 +68,7 @@ public class StationDataCollectorApplication {
         channel.basicConsume(QUEUE_CUSTOMER_STATIONS_DATA, true, deliverCallback, consumerTag -> { });
     }
 
-    private static void getCustomerChargeFromDBs(CustomerStationData data) {
+    public static void getCustomerChargeFromDBs(CustomerStationData data) {
         var stations = data.getStations();
         try {
             for(int i = 0; i < stations.size(); i++) {
@@ -97,11 +97,11 @@ public class StationDataCollectorApplication {
         }
 
         //send blue message
-        sendCharge(customerId, totalCharge);
+        ConnectionFactory factory = new ConnectionFactory(); //create factory here to be able to test it
+        sendCharge(customerId, totalCharge, factory);
     }
 
-    public static void sendCharge(String customerId, double totalCharge) {
-        ConnectionFactory factory = new ConnectionFactory();
+    public static void sendCharge(String customerId, double totalCharge, ConnectionFactory factory) {
         factory.setHost("localhost");
 
         try (Connection connection = factory.newConnection();

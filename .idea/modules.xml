@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Client/Client.iml" filepath="$PROJECT_DIR$/Client/Client.iml" />
       <module fileurl="file://$PROJECT_DIR$/DataCollectionDispatcher/DataCollectionDispatcher.iml" filepath="$PROJECT_DIR$/DataCollectionDispatcher/DataCollectionDispatcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/DataCollectionReceiver/DataCollectionReceiver.iml" filepath="$PROJECT_DIR$/DataCollectionReceiver/DataCollectionReceiver.iml" />
       <module fileurl="file://$PROJECT_DIR$/PdfGenerator/PdfGenerator.iml" filepath="$PROJECT_DIR$/PdfGenerator/PdfGenerator.iml" />

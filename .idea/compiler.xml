@@ -11,9 +11,11 @@
         <module name="DataCollectionDispatcher" />
         <module name="DataCollectionReceiver" />
         <module name="StationsApi" />
+        <module name="Client" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="Client" target="11" />
       <module name="DataCollectionDispatcher" target="17" />
       <module name="DataCollectionReceiver" target="17" />
       <module name="PdfGenerator" target="17" />

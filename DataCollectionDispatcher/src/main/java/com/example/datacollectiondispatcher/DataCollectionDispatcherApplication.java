@@ -19,9 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootApplication
 public class DataCollectionDispatcherApplication {
 
-    private final static String QUEUE_CUSTOMER_ID = "customer_id"; //red message
-    private final static String QUEUE_CUSTOMER_STATIONS_DATA = "customer_stations_data"; //green
-    private final static String QUEUE_INVOICE_GENERATION_STARTED = "invoice_generation_started"; //purple
+    public final static String QUEUE_CUSTOMER_ID = "customer_id"; //red message
+    public final static String QUEUE_CUSTOMER_STATIONS_DATA = "customer_stations_data"; //green
+    public final static String QUEUE_INVOICE_GENERATION_STARTED = "invoice_generation_started"; //purple
 
     private static DispatcherService dispatcherService;
 
@@ -37,7 +37,8 @@ public class DataCollectionDispatcherApplication {
             try {
                 // Inject to use the DispatcherService
                 dispatcherService = ctx.getBean(DispatcherService.class);
-                receiveCustomerNumber(); //receive red message
+                ConnectionFactory factory = new ConnectionFactory();
+                receiveCustomerNumber(factory); //receive red message
             }
             catch(Exception e) {
                 System.out.println(" [*] An exception occurred...");
@@ -45,8 +46,7 @@ public class DataCollectionDispatcherApplication {
         };
     }
 
-    public static void receiveCustomerNumber() throws IOException, TimeoutException {
-        ConnectionFactory factory = new ConnectionFactory();
+    public static void receiveCustomerNumber(ConnectionFactory factory) throws IOException, TimeoutException {
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
@@ -60,16 +60,13 @@ public class DataCollectionDispatcherApplication {
             List<StationEntity> stations = dispatcherService.fetchStations();
             CustomerStationData data = new CustomerStationData(customerId, stations);
 
-            sendStationData(data); //send green message
-            sendInvoiceGenerationInfos(data); //send purple message
+            sendStationData(data, factory); //send green message
+            sendInvoiceGenerationInfos(data, factory); //send purple message
         };
           channel.basicConsume(QUEUE_CUSTOMER_ID, true, deliverCallback, consumerTag -> { });
     }
 
-    public static void sendStationData(CustomerStationData data) {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-
+    public static void sendStationData(CustomerStationData data, ConnectionFactory factory) {
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
             channel.queueDeclare(QUEUE_CUSTOMER_STATIONS_DATA, false, false, false, null);
@@ -87,10 +84,7 @@ public class DataCollectionDispatcherApplication {
         }
     }
 
-    public static void sendInvoiceGenerationInfos(CustomerStationData data) {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-
+    public static void sendInvoiceGenerationInfos(CustomerStationData data, ConnectionFactory factory) {
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
             channel.queueDeclare(QUEUE_INVOICE_GENERATION_STARTED, false, false, false, null);

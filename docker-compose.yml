@@ -2,7 +2,7 @@ version : '3.8'
 
 services:
   customer-db:
-    build: customer_db/.
+    build: database/customer_db/.
     ports:
       - '30001:5432'
     environment:
@@ -10,7 +10,7 @@ services:
       - POSTGRES_PASSWORD=postgres
 
   station-db:
-    build: stations_db/.
+    build: database/stations_db/.
     ports:
       - '30002:5432'
     environment:
@@ -18,7 +18,7 @@ services:
       - POSTGRES_PASSWORD=postgres
 
   station-1-db:
-    build: station_1_db/.
+    build: database/station_1_db/.
     ports:
       - '30011:5432'
     environment:
@@ -26,7 +26,7 @@ services:
       - POSTGRES_PASSWORD=postgres
 
   station-2-db:
-    build: station_2_db/.
+    build: database/station_2_db/.
     ports:
       - '30012:5432'
     environment:
@@ -34,7 +34,7 @@ services:
       - POSTGRES_PASSWORD=postgres
 
   station-3-db:
-    build: station_3_db/.
+    build: database/station_3_db/.
     ports:
       - '30013:5432'
     environment:

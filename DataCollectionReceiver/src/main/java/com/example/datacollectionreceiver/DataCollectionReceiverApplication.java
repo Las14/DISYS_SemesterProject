@@ -1,6 +1,5 @@
 package com.example.datacollectionreceiver;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -17,12 +16,12 @@ import java.util.concurrent.TimeoutException;
 
 @SpringBootApplication
 public class DataCollectionReceiverApplication {
-    private final static String QUEUE_INVOICE_GENERATION_STARTED = "invoice_generation_started"; //purple
-    private final static String QUEUE_CUSTOMER_CHARGE_DATA = "customer_charge_data"; //blue
-    private final static String QUEUE_CUSTOMER_TOTAL_CHARGE = "customer_total_charge"; //orange
-    private static int  totalCount = 0;
+    public final static String QUEUE_INVOICE_GENERATION_STARTED = "invoice_generation_started"; //purple
+    public final static String QUEUE_CUSTOMER_CHARGE_DATA = "customer_charge_data"; //blue
+    public final static String QUEUE_CUSTOMER_TOTAL_CHARGE = "customer_total_charge"; //orange
+    private static int totalCount = 0;
     private static int count = 0;
-    private static double  totalCharge = 0;
+    private static double totalCharge = 0;
 
     public static void main(String[] args) {
         SpringApplication.run(DataCollectionReceiverApplication.class, args);
@@ -33,7 +32,8 @@ public class DataCollectionReceiverApplication {
         return args -> {
 
             try {
-                receiveNumberOfDatabasesForCustomer(); //receive purple message
+                ConnectionFactory factory = new ConnectionFactory();
+                receiveNumberOfDatabasesForCustomer(factory); //receive purple message
 
             }
             catch(Exception e) {
@@ -42,8 +42,7 @@ public class DataCollectionReceiverApplication {
         };
     }
 
-    private static void receiveNumberOfDatabasesForCustomer() throws IOException, TimeoutException {
-        ConnectionFactory factory = new ConnectionFactory();
+    public static void receiveNumberOfDatabasesForCustomer(ConnectionFactory factory) throws IOException, TimeoutException {
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
@@ -59,7 +58,7 @@ public class DataCollectionReceiverApplication {
                 String[] idNumberOfStations = data.split(";");
                 totalCount = Integer.parseInt(idNumberOfStations[1]);
                 System.out.println("[*] Received customer total databases: "+ totalCount);
-                receiveInvoiceData();
+                receiveInvoiceData(factory);
             } catch (IOException | TimeoutException e) {
                 e.printStackTrace();
             }
@@ -67,8 +66,7 @@ public class DataCollectionReceiverApplication {
         channel.basicConsume(QUEUE_INVOICE_GENERATION_STARTED, true, deliverCallback, consumerTag -> { });
     }
 
-    private static void receiveInvoiceData() throws IOException, TimeoutException {
-        ConnectionFactory factory = new ConnectionFactory();
+    public static void receiveInvoiceData(ConnectionFactory factory) throws IOException, TimeoutException {
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
@@ -88,7 +86,7 @@ public class DataCollectionReceiverApplication {
 
                 if(count == totalCount) {
                     count = 0; //reset counter for the next customer
-                    sendTotalCharge(id); //send orange message
+                    sendTotalCharge(id, factory); //send orange message
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -97,8 +95,7 @@ public class DataCollectionReceiverApplication {
         channel.basicConsume(QUEUE_CUSTOMER_CHARGE_DATA, true, deliverCallback, consumerTag -> { });
     }
 
-    public static void sendTotalCharge(String customerId) {
-        ConnectionFactory factory = new ConnectionFactory();
+    public static void sendTotalCharge(String customerId, ConnectionFactory factory) {
         factory.setHost("localhost");
 
         try (Connection connection = factory.newConnection();
@@ -109,6 +106,7 @@ public class DataCollectionReceiverApplication {
             channel.basicPublish("", QUEUE_CUSTOMER_TOTAL_CHARGE, null, message.getBytes());
             System.out.println("[x] Sent total charge for customer  '" + message + "'");
             totalCharge = 0; //reset total charge
+            totalCount = 0;
             System.out.println("count: " + count);
             System.out.println("totalCharge: " + totalCharge);
             System.out.println("---------------------------- End --------------------------------");

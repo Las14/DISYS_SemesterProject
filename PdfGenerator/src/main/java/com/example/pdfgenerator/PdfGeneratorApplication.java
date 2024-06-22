@@ -22,9 +22,9 @@ import java.util.concurrent.TimeoutException;
 
 @SpringBootApplication
 public class PdfGeneratorApplication {
-    private final static String QUEUE_CUSTOMER_TOTAL_CHARGE = "customer_total_charge"; //orange
+    public final static String QUEUE_CUSTOMER_TOTAL_CHARGE = "customer_total_charge"; //orange
 
-    private static GeneratorService generatorService;
+    public static GeneratorService generatorService;
 
     public static void main(String[] args) {
         SpringApplication.run(PdfGeneratorApplication.class, args);
@@ -38,7 +38,8 @@ public class PdfGeneratorApplication {
 
             try {
                 generatorService = ctx.getBean(GeneratorService.class);
-                receiveTotalCharge();//receive orange message
+                ConnectionFactory factory = new ConnectionFactory();
+                receiveTotalCharge(factory);//receive orange message
 
             }
             catch(Exception e) {
@@ -47,8 +48,7 @@ public class PdfGeneratorApplication {
         };
     }
 
-    private static void receiveTotalCharge() throws IOException, TimeoutException {
-        ConnectionFactory factory = new ConnectionFactory();
+    public static void receiveTotalCharge(ConnectionFactory factory) throws IOException, TimeoutException {
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
@@ -76,7 +76,6 @@ public class PdfGeneratorApplication {
     private static void generateCustomerInvoice(int id, double charge){
         Customer customer = generatorService.getCustomer(id);
 
-        /******/
         // Ensure the invoices directory exists
         File invoicesDir = new File("invoices");
         if (!invoicesDir.exists()) {
@@ -104,7 +103,6 @@ public class PdfGeneratorApplication {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        /******/
     }
 
 
