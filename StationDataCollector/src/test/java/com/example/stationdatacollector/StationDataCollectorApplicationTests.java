@@ -26,7 +26,6 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 public class StationDataCollectorApplicationTests {
 
-    @InjectMocks
     private StationDataCollectorApplication stationDataCollectorApplication;
 
     @Mock

@@ -49,6 +49,7 @@ public class DataCollectionDispatcherApplication {
 // code from scaling class
     public static void receiveCustomerNumber(ConnectionFactory factory) throws IOException, TimeoutException {
         factory.setHost("localhost");
+
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 

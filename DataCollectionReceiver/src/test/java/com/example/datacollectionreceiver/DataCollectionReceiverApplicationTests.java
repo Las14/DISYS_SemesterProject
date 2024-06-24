@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 class DataCollectionReceiverApplicationTests {
 
-    @InjectMocks
     DataCollectionReceiverApplication dataCollectionReceiverApplication;
 
     @Mock

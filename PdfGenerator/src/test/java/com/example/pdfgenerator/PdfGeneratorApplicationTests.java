@@ -17,17 +17,15 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class PdfGeneratorApplicationTests {
-
-    //@InjectMocks
     private PdfGeneratorApplication pdfGeneratorApplication;
 
-   // @Mock
+    @Mock
     private ConnectionFactory connectionFactory;
 
-   // @Mock
+    @Mock
     private Connection rabbitConnection;
 
-   // @Mock
+    @Mock
     private Channel channel;
 
     @BeforeEach

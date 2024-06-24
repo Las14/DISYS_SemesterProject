@@ -19,7 +19,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 class DataCollectionDispatcherApplicationTests {
-    @InjectMocks
     private DataCollectionDispatcherApplication dataCollectionDispatcherApplication;
 
     @Mock
