@@ -29,7 +29,8 @@ public class DataCollectionDispatcherApplication {
         SpringApplication.run(DataCollectionDispatcherApplication.class, args);
     }
 
-    //Run this code when application has started
+    // is a functional interface in Spring Boot that is used to execute code
+    // after the Spring application has started
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
@@ -45,7 +46,7 @@ public class DataCollectionDispatcherApplication {
             }
         };
     }
-
+// code from scaling class
     public static void receiveCustomerNumber(ConnectionFactory factory) throws IOException, TimeoutException {
         factory.setHost("localhost");
         Connection connection = factory.newConnection();

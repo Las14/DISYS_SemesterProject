@@ -28,7 +28,7 @@ public class InvoiceController {
     private void initialize() {
         collectData.setOnAction(event -> collectData());
     }
-
+    //https://www.digitalocean.com/community/tutorials/java-httpurlconnection-example-java-http-request-get-post
     @FXML
     private void collectData() {
         String customerId = customer_id.getText();
@@ -50,19 +50,24 @@ public class InvoiceController {
             e.printStackTrace();
         }
     }
-
+//https://medium.com/@akshathaholla91/scheduling-poll-based-tasks-using-timer-in-java-bebbb0e814aa
     private void pollingForInvoice(String customerId) {
+        //Creates a new Timer instance.
         Timer timer = new Timer();
+        //class is an abstract class that implements the Runnable interface and represents a task that can be scheduled for execution by a Timer.
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 try {
+                    //Calls the invoiceStatus method to check if the invoice for the specified customer ID is ready.
                     var status = invoiceStatus(customerId);
                     System.out.println("status: " + status);
+                   //Checks if the invoice is ready.
                     if (status) {
                         timer.cancel();
                     }
                 } catch (IOException e) {
+                    //Outputs the stack trace of the exception to the console, which helps in debugging by showing where the exception occurred.
                     e.printStackTrace();
                 }
             }
@@ -78,10 +83,16 @@ public class InvoiceController {
         int responseCode = conn.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_OK) { // success
             String savePath = "C:/Users/Maria/OneDrive/Desktop/invoices/invoice_" + customerId + ".pdf";
+            //Obtains the input stream from the HTTP connection (conn), allowing you to read the response data from the server.
             try (InputStream in = new BufferedInputStream(conn.getInputStream());
+                 //Creates a FileOutputStream to the file located at savePath, allowing you to write data to this file.
+                 // If the file does not exist, it will be created. If it does exist, it will be overwritten.
                  FileOutputStream out = new FileOutputStream(savePath)) {
+                //Declares a byte array buffer used to temporarily store chunks of data read from the input stream.
                 byte[] buffer = new byte[4096];
                 int bytesRead;
+                // Reads up to buffer.length bytes of data from the input stream into the buffer.
+                // Returns the number of bytes read, or -1 if the end of the stream is reached.
                 while ((bytesRead = in.read(buffer)) != -1) {
                     out.write(buffer, 0, bytesRead);
                 }

@@ -78,16 +78,20 @@ public class PdfGeneratorApplication {
 
         // Ensure the invoices directory exists
         File invoicesDir = new File("invoices");
+        //Checks if the invoices directory exists, and if not, creates it
         if (!invoicesDir.exists()) {
             invoicesDir.mkdirs();
         }
 
         // Define the file path to save the PDF
         String filePath = "invoices/customer_invoice_" + id + ".pdf";
-
+            //Creates a FileOutputStream to write the PDF file to the specified filePath
         try (FileOutputStream fos = new FileOutputStream(filePath);
+             //Creates a PdfWriter instance to write content to the PDF file.
              PdfWriter writer = new PdfWriter(fos);
+             //Creates a PdfDocument instance representing the PDF document.
              PdfDocument pdfDoc = new PdfDocument(writer);
+             //Creates a Document instance to add elements (like paragraphs) to the PDF.
              Document document = new Document(pdfDoc)) {
 
             // Add content to the PDF

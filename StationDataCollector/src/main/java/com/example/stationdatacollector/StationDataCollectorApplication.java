@@ -84,11 +84,15 @@ public class StationDataCollectorApplication {
        String dbUrl = String.format("jdbc:postgresql://%s/stationdb?user=postgres&password=postgres", station.getDbUrl());
 
         double totalCharge = 0.0;
+        //Uses the DriverManager class to create a new database connection using the specified dbUrl
         try (java.sql.Connection connection = DriverManager.getConnection(dbUrl)) {
             String sql = "SELECT SUM(kwh) AS total_kwh FROM charge WHERE customer_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                //Sets the value of the first parameter in the SQL query (?) to the integer value of customerId
                 statement.setInt(1, Integer.parseInt(customerId));
+                //Executes the query defined in the PreparedStatement and returns a ResultSet containing the results.
                 try (ResultSet resultSet = statement.executeQuery()) {
+                    //iterates only once, assigning the value of total_kwh to totalCharge
                     while (resultSet.next()) {
                         totalCharge = resultSet.getDouble("total_kwh");
                     }
